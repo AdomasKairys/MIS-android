@@ -7,10 +7,9 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MeasurementDao {
+interface UserSignalDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertMeasurement(measurementEntity: MeasurementEntity)
-
-    @Query("SELECT * FROM measurements")
-    fun getMeasurements(): Flow<List<MeasurementEntity>>
+    fun insertUserSignal(userSignalEntity: UserSignalEntity)
+    @Query("SELECT * FROM user_signals WHERE user_mac=:userMac")
+    fun getSignalByUser(userMac: String): Flow<List<UserSignalEntity>>
 }

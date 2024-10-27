@@ -5,7 +5,8 @@ import java.sql.SQLException
 
 class RemoteDatabase(private val userDao: UserDao,
                      private  val measurementDao: MeasurementDao,
-                     private val strengthDao: StrengthDao) {
+                     private val strengthDao: StrengthDao,
+                     private  val userSignalDao: UserSignalDao) {
     private lateinit var connection: Connection
     init{
         val jdbcUrl = "jdbc:mariadb://seklys.ila.lt/LDB"
@@ -28,16 +29,22 @@ class RemoteDatabase(private val userDao: UserDao,
 
     }
     private fun loadUsers(){
-        val query = connection.prepareStatement("SELECT * FROM `vartotojai`")
+        val query = connection.prepareStatement("""
+            SELECT `vart`.mac, GROUP_CONCAT(`vart`.`stiprumas`) AS `stiprumai`, GROUP_CONCAT(`vart`.`sensorius`) AS `sensoriai` 
+            FROM (SELECT * FROM `vartotojai` ORDER BY `vartotojai`.`sensorius`ASC) AS `vart` GROUP BY `vart`.mac""".trimIndent())
         val result = query.executeQuery()
         while(result.next()) {
             val user = UserEntity(
-                result.getInt("id"),
                 result.getString("mac"),
-                result.getString("sensorius"),
-                result.getInt("stiprumas")
             )
             userDao.insertUser(user);
+            val userSignal = UserSignalEntity(
+                0,
+                result.getString("mac"),
+                result.getString("stiprumai"),
+                result.getString("sensoriai")
+            )
+            userSignalDao.insertUserSignal(userSignal);
         }
     }
     private fun loadMeasurements(){
