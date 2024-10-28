@@ -5,5 +5,13 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_signals">Signals</string>
     <string name="title_identification">Identification</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="enter_mac_address">Enter MAC Address</string>
+    <string name="place_holder">place holder</string>
+    <string name="temp_error">temp error</string>
+    <string name="wiliboxas1">wiliboxas1</string>
+    <string name="wiliboxas2">wiliboxas2</string>
+    <string name="wiliboxas3">wiliboxas3</string>
 
 </resources>

@@ -1,12 +1,15 @@
 package com.example.misandroid.ui.identification
 
 import android.content.SharedPreferences
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -15,15 +18,21 @@ import androidx.navigation.Navigation
 import com.example.misandroid.MainActivity.Companion.USER_KEY
 import com.example.misandroid.MainActivity.Companion.sharedPreferences
 import com.example.misandroid.R
+import com.example.misandroid.database.UserEntity
 import com.example.misandroid.databinding.FragmentIdentificationBinding
 
-class IdentificationFragment : Fragment(), View.OnClickListener {
+class IdentificationFragment : Fragment() {
     private var _binding: FragmentIdentificationBinding? = null
     private var _navc: NavController? = null
+    private var _identificationViewModel: IdentificationViewModel? = null
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
     private val navc get() = _navc!!
+    private val identificationViewModel get() = _identificationViewModel!!
+
+
+    private lateinit var userList : List<UserEntity>
     fun macFormat(){
         val etMacAddress = binding.etMacAddress
 
@@ -62,10 +71,16 @@ class IdentificationFragment : Fragment(), View.OnClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val identificationViewModel =
+        _identificationViewModel =
             ViewModelProvider(this).get(IdentificationViewModel::class.java)
 
         _binding = FragmentIdentificationBinding.inflate(inflater, container, false)
+        binding.errorIdentification.visibility = INVISIBLE
+
+        identificationViewModel.usersList.observe(viewLifecycleOwner){
+            userList=it
+        }
+
         return binding.root
     }
 
@@ -75,23 +90,39 @@ class IdentificationFragment : Fragment(), View.OnClickListener {
 
         macFormat()
 
-        val button = binding.loginButton
+        val buttonLogin = binding.loginButton
+        val buttonRegister = binding.registerButton
 
-        button.setOnClickListener(this)
-    }
 
-    override fun onClick(v: View?) {
-        //your implementation goes here
-        val etMacAddress = binding.etMacAddress
-        if(etMacAddress.text.length == 17) {
-            val editor: SharedPreferences.Editor = sharedPreferences.edit()
-            editor.clear();
-            editor.putString(USER_KEY, etMacAddress.text.toString())
-            editor.commit();
-            navc.navigate(R.id.navigation_home)
-        }else{
-            etMacAddress.text.clear()
-        }
+        buttonLogin.setOnClickListener {
+            val etMacAddress = binding.etMacAddress
+            if(etMacAddress.text.length == 17 && userList.any { us -> us.macAddress == etMacAddress.text.toString()}) {
+                val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                editor.clear();
+                editor.putString(USER_KEY, etMacAddress.text.toString())
+                editor.commit();
+                navc.navigate(R.id.navigation_home)
+            }else{
+                binding.errorIdentification.visibility = VISIBLE
+                binding.errorIdentification.text = "some error"
+                etMacAddress.text.clear()
+            } }
+
+        buttonRegister.setOnClickListener {
+            val etMacAddress = binding.etMacAddress
+            if(etMacAddress.text.length == 17 && !userList.any { us -> us.macAddress == etMacAddress.text.toString()}) {
+                identificationViewModel.inserUser(UserEntity(etMacAddress.text.toString()))
+                val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                editor.clear();
+                editor.putString(USER_KEY, etMacAddress.text.toString())
+                editor.commit();
+                navc.navigate(R.id.navigation_home)
+            }else{
+                binding.errorIdentification.visibility = VISIBLE
+                binding.errorIdentification.text = "some error"
+                etMacAddress.text.clear()
+            } }
+
     }
     override fun onDestroyView() {
         super.onDestroyView()

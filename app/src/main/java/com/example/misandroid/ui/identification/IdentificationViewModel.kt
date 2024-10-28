@@ -5,11 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.example.misandroid.MainActivity
 import com.example.misandroid.database.StrengthEntity
+import com.example.misandroid.database.UserEntity
 
 class IdentificationViewModel  : ViewModel() {
 
-    private val _signalList = MainActivity.database.strengthDao.getStrength()
+    private val _userList = MainActivity.database.userDao.getUsers()
 
-    val signalList: LiveData<List<StrengthEntity>> = _signalList.asLiveData()
+    val usersList: LiveData<List<UserEntity>> = _userList.asLiveData()
+
+    fun inserUser(userEntity: UserEntity){
+        Thread{MainActivity.database.userDao.insertUser(userEntity)}.start()
+    }
 
 }

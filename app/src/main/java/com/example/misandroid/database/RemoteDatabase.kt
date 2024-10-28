@@ -30,7 +30,7 @@ class RemoteDatabase(private val userDao: UserDao,
     }
     private fun loadUsers(){
         val query = connection.prepareStatement("""
-            SELECT `vart`.mac, GROUP_CONCAT(`vart`.`stiprumas`) AS `stiprumai`, GROUP_CONCAT(`vart`.`sensorius`) AS `sensoriai` 
+            SELECT row_number() over (order by `vart`.mac) AS `id`, `vart`.mac, GROUP_CONCAT(`vart`.`stiprumas`) AS `stiprumai`, GROUP_CONCAT(`vart`.`sensorius`) AS `sensoriai` 
             FROM (SELECT * FROM `vartotojai` ORDER BY `vartotojai`.`sensorius`ASC) AS `vart` GROUP BY `vart`.mac""".trimIndent())
         val result = query.executeQuery()
         while(result.next()) {
@@ -39,7 +39,7 @@ class RemoteDatabase(private val userDao: UserDao,
             )
             userDao.insertUser(user);
             val userSignal = UserSignalEntity(
-                0,
+                result.getInt("id"),
                 result.getString("mac"),
                 result.getString("stiprumai"),
                 result.getString("sensoriai")

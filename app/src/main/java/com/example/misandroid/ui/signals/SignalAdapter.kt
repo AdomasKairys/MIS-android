@@ -12,12 +12,14 @@ class SignalAdapter(
     private val dataset: List<UserSignalEntity>
 ) : RecyclerView.Adapter<SignalAdapter.SignalViewHolder>(){
     class SignalViewHolder(private val view: View): RecyclerView.ViewHolder(view){
-        val textView: TextView = view.findViewById(R.id.cell_title)
+        val strength: TextView = view.findViewById(R.id.signal_strengths)
+        val names: TextView = view.findViewById(R.id.signal_names)
+        val coordinated: TextView = view.findViewById(R.id.coordinates)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SignalViewHolder {
         val adapterLayout = LayoutInflater.from(parent.context)
-            .inflate(R.layout.map_cell, parent, false)
+            .inflate(R.layout.signal_card, parent, false)
         return SignalViewHolder(adapterLayout)
     }
 
@@ -27,6 +29,7 @@ class SignalAdapter(
 
     override fun onBindViewHolder(holder: SignalViewHolder, position: Int) {
         val item = dataset[position]
-        holder.textView.text = item.userMac.toString()
+        holder.strength.text = item.strength
+        holder.names.text = "wiliboxas"
     }
 }

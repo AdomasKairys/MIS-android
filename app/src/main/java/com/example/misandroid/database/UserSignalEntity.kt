@@ -24,5 +24,5 @@ data class UserSignalEntity(
     @ColumnInfo(name = "strength")
     val strength: String,
     @ColumnInfo(name = "sensor")
-    val sensor: String,
+    val sensor: String, //not really needed since its always the same
 )
