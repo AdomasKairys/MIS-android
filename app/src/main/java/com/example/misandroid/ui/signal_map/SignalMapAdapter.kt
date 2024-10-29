@@ -17,7 +17,9 @@ class SignalMapAdapter (
         fun bind(cell: MapCell) {
             textView.text = "${cell.x},${cell.y}"
             itemView.setBackgroundColor(
-                if (cell.isMeasured) android.graphics.Color.YELLOW else android.graphics.Color.WHITE
+                if (cell.isSelected) android.graphics.Color.BLUE
+                else if (cell.isMeasured) android.graphics.Color.YELLOW
+                else android.graphics.Color.WHITE
             )
         }
     }

@@ -9,6 +9,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.asLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -19,6 +21,7 @@ import androidx.room.Room
 import com.example.misandroid.database.LbdDatabase
 import com.example.misandroid.database.RemoteDatabase
 import com.example.misandroid.database.UserEntity
+import com.example.misandroid.database.UserSignalEntity
 import com.example.misandroid.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -27,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private var PREFS_KEY = "prefs"
+    private var ROOM_KEY = "room"
 
     private lateinit var navController: NavController
     private lateinit var toolbar: Toolbar
@@ -53,17 +57,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        sharedPreferences = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+
         Thread {
             database = Room.databaseBuilder(
-                            applicationContext,
-                            LbdDatabase::class.java,
-                            "lbd.db"
-                        ).build()
-            RemoteDatabase(database.userDao, database.measurementDao, database.strengthDao, database.userSignalDao)
-
+                applicationContext,
+                LbdDatabase::class.java,
+                "lbd.db"
+            ).build()
+            RemoteDatabase(
+                database.userDao,
+                database.measurementDao,
+                database.userSignalDao
+            )
         }.start()
-
-        sharedPreferences = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

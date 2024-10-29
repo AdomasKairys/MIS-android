@@ -2,10 +2,10 @@ package com.example.misandroid.database
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
+import com.example.misandroid.utility.Utils.Companion.calculateDistance
 
 class RemoteDatabase(private val userDao: UserDao,
                      private  val measurementDao: MeasurementDao,
-                     private val strengthDao: StrengthDao,
                      private  val userSignalDao: UserSignalDao) {
     private lateinit var connection: Connection
     init{
@@ -14,9 +14,8 @@ class RemoteDatabase(private val userDao: UserDao,
         connection = DriverManager.getConnection(jdbcUrl, "stud", "vLXCDmSG6EpEnhXX")
 
         try {
-            loadUsers()
-            loadMeasurements()
-            loadStrengths()
+            val m = loadMeasurements()
+            loadUsers(m)
         }
         catch (e: SQLException) {
             //handle exception here
@@ -28,10 +27,12 @@ class RemoteDatabase(private val userDao: UserDao,
         }
 
     }
-    private fun loadUsers(){
+    private fun loadUsers(measurements: List<MeasurementEntity>){
         val query = connection.prepareStatement("""
-            SELECT row_number() over (order by `vart`.mac) AS `id`, `vart`.mac, GROUP_CONCAT(`vart`.`stiprumas`) AS `stiprumai`, GROUP_CONCAT(`vart`.`sensorius`) AS `sensoriai` 
-            FROM (SELECT * FROM `vartotojai` ORDER BY `vartotojai`.`sensorius`ASC) AS `vart` GROUP BY `vart`.mac""".trimIndent())
+            SELECT row_number() over (order by `vart`.mac) AS `id`, `vart`.mac, 
+            GROUP_CONCAT(`vart`.`stiprumas` ORDER BY `vart`.`sensorius`ASC) AS `stiprumai`, 
+            GROUP_CONCAT(`vart`.`sensorius` ORDER BY `vart`.`sensorius`ASC) AS `sensoriai` 
+            FROM (SELECT * FROM `vartotojai`) AS `vart` GROUP BY `vart`.mac""".trimIndent())
         val result = query.executeQuery()
         while(result.next()) {
             val user = UserEntity(
@@ -42,36 +43,33 @@ class RemoteDatabase(private val userDao: UserDao,
                 result.getInt("id"),
                 result.getString("mac"),
                 result.getString("stiprumai"),
-                result.getString("sensoriai")
+                calculateDistance(result.getString("stiprumai"),measurements)
             )
             userSignalDao.insertUserSignal(userSignal);
         }
     }
-    private fun loadMeasurements(){
-        val query = connection.prepareStatement("SELECT * FROM `matavimai`")
+    private fun loadMeasurements() : ArrayList<MeasurementEntity>{
+        val query = connection.prepareStatement("""
+            SELECT `stip`.`matavimas`,CONCAT(`stip`.`x`,",",`stip`.`y`) AS `koordinates`, GROUP_CONCAT(`stip`.`stiprumas` ORDER BY `stip`.`sensorius` ASC) as `stiprumai`, GROUP_CONCAT(`stip`.`sensorius` ORDER BY `stip`.`sensorius` ASC) as `sensoriai`
+            FROM (
+            SELECT `stiprumai`.`matavimas`,`matavimai`.`x`,`matavimai`.`y`,`stiprumai`.`stiprumas`,`stiprumai`.`sensorius`
+            FROM `stiprumai`
+            JOIN `matavimai` 
+            ON `stiprumai`.`matavimas`=`matavimai`.`matavimas`) AS `stip`
+            GROUP BY `stip`.`matavimas`
+        """.trimIndent())
         val result = query.executeQuery()
+        var list: ArrayList<MeasurementEntity> = ArrayList()
         while(result.next()) {
             val measurement = MeasurementEntity(
                 result.getInt("matavimas"),
-                result.getInt("x"),
-                result.getInt("y"),
-                result.getDouble("atstumas")
+                result.getString("koordinates"),
+                result.getString("stiprumai"),
+                result.getString("sensoriai")
             )
             measurementDao.insertMeasurement(measurement);
+            list.add(measurement)
         }
-    }
-    private fun loadStrengths(){
-        val query = connection.prepareStatement("SELECT * FROM `stiprumai`")
-        val result = query.executeQuery()
-        while(result.next()) {
-            val strength = StrengthEntity(
-                result.getInt("id"),
-                result.getInt("matavimas"),
-                result.getString("sensorius"),
-                result.getInt("stiprumas")
-            )
-            strengthDao.insertStrength(strength);
-        }
-
+        return list
     }
 }

@@ -1,5 +1,6 @@
 package com.example.misandroid.database
 
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,10 +10,10 @@ data class MeasurementEntity(
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "id")
     val measurementId: Int,
-    @ColumnInfo(name = "x")
-    val xCoordinate:Int,
-    @ColumnInfo(name = "y")
-    val yCoordinate:Int,
-    @ColumnInfo(name = "distance")
-    val distance:Double
+    @ColumnInfo(name = "coordinates")
+    val coordinates:String,
+    @ColumnInfo(name = "strength")
+    val strength:String,
+    @ColumnInfo(name = "sensor")
+    val sensor:String
 )

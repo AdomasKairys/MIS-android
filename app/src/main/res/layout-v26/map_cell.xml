@@ -4,7 +4,7 @@
     android:layout_width="25dp"
     android:layout_height="25dp"
     android:autoSizeTextType="uniform"
-    android:autoSizeMinTextSize="12sp"
+    android:autoSizeMinTextSize="5sp"
     android:autoSizeMaxTextSize="100sp"
     android:autoSizeStepGranularity="2sp"
     android:maxLines="1">

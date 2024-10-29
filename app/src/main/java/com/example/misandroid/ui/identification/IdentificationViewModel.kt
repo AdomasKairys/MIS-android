@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.example.misandroid.MainActivity
-import com.example.misandroid.database.StrengthEntity
 import com.example.misandroid.database.UserEntity
 
 class IdentificationViewModel  : ViewModel() {

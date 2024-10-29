@@ -12,6 +12,11 @@ import androidx.room.PrimaryKey
             entity = UserEntity::class,
             parentColumns = arrayOf("mac_address"),
             childColumns = arrayOf("user_mac")
+        ),
+        ForeignKey(
+            entity = MeasurementEntity::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("measurement_id")
         )
     ]
 )
@@ -23,6 +28,6 @@ data class UserSignalEntity(
     val userMac: String,
     @ColumnInfo(name = "strength")
     val strength: String,
-    @ColumnInfo(name = "sensor")
-    val sensor: String, //not really needed since its always the same
+    @ColumnInfo(name = "measurement_id")
+    val measurementId: Int
 )

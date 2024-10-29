@@ -13,4 +13,7 @@ interface MeasurementDao {
 
     @Query("SELECT * FROM measurements")
     fun getMeasurements(): Flow<List<MeasurementEntity>>
+
+    @Query("SELECT * FROM measurements WHERE id=:measurementId")
+    fun getMeasurementsById(measurementId:Int): MeasurementEntity?
 }

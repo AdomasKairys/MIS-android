@@ -34,10 +34,10 @@ class SignalMapFragment : Fragment() {
         val recyclerView: RecyclerView = binding.signalMap
 
         signalMapViewModel.measurementList.observe(viewLifecycleOwner) { it ->
-            val yMin = it.minOf { y->y.yCoordinate }
-            val yMax = it.maxOf { y->y.yCoordinate }
-            val xMin = it.minOf { x->x.xCoordinate }
-            val xMax = it.maxOf { x->x.xCoordinate }
+            val yMin = it.minOf { y->y.coordinates.split(',')[1].toInt() }
+            val yMax = it.maxOf { y->y.coordinates.split(',')[1].toInt() }
+            val xMin = it.minOf { x->x.coordinates.split(',')[0].toInt() }
+            val xMax = it.maxOf { x->x.coordinates.split(',')[0].toInt() }
             val rows = yMax - yMin + 1
             val columns = xMax - xMin + 1
             recyclerView.layoutManager = GridLayoutManager(this.context, columns)
@@ -45,8 +45,8 @@ class SignalMapFragment : Fragment() {
                 val x = index % columns
                 val y = index / columns
                 MapCell(x + xMin, yMax-y,
-                    isMeasured = it.any { e -> e.xCoordinate == x + xMin && e.yCoordinate == yMax - y },
-                    isSelected = false)
+                    isMeasured = it.any { e -> e.coordinates == "${x+xMin},${yMax-y}" },
+                    isSelected = signalMapViewModel.isMeasured(it.firstOrNull{i -> i.coordinates == "${x+xMin},${yMax-y}"}?.measurementId))
             }
             recyclerView.adapter = SignalMapAdapter(cells)
         }
